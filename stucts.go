@@ -7,13 +7,15 @@ type createRequest struct {
 	Repeat  string `json:"repeat"`
 }
 
-type createResponse struct {
-	Id    int    `json:"id"`
+type createResponseId struct {
+	Id string `json:"id"`
+}
+type createResponseError struct {
 	Error string `json:"error"`
 }
 
 type task struct {
-	Id      int    `json:"id"`
+	Id      string `json:"id"`
 	Date    string `json:"date"`
 	Title   string `json:"title"`
 	Comment string `json:"comment"`

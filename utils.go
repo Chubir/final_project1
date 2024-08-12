@@ -18,14 +18,14 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 		for time.Until(nextDate) < 0 {
 			nextDate = nextDate.AddDate(0, 0, days)
 		}
-		return nextDate.Format(time.DateOnly), nil
+		return nextDate.Format("20060102"), nil
 	case "y":
 		years, _ := strconv.Atoi(value)
 		nextDate := now.AddDate(years, 0, 0)
 		for time.Until(nextDate) < 0 {
 			nextDate = nextDate.AddDate(0, 0, years)
 		}
-		return nextDate.Format(time.DateOnly), nil
+		return nextDate.Format("20060102"), nil
 	}
 	return date, nil
 }
