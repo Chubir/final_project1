@@ -280,3 +280,48 @@ func DeleteTaskHandler(db *sql.DB) http.HandlerFunc {
 
 	}
 }
+
+func NextDateHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		now := r.URL.Query().Get("now")
+		next := r.URL.Query().Get("date")
+		repeat := r.URL.Query().Get("repeat")
+		re := regexp.MustCompile(`^(d\s\d+|y|w\s[1-7](,\s?[1-7])*)$`)
+		if repeat == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Отсутсвует повторение задачи."))
+			return
+		}
+		if !re.MatchString(repeat) {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Формат повторения задач неверный."))
+			return
+		}
+
+		nowTime, err := time.Parse("20060102", now)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Формат даты now неверный."))
+			return
+		}
+		nextTime, err := time.Parse("20060102", next)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Формат даты next неверный."))
+			return
+		}
+
+		if nextTime.Before(nowTime) {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Введена дата несоответствующего формата."))
+			return
+		}
+		nextDate, err := NextDate(nowTime, next, repeat)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Ошибка в функции NextDate."))
+			return
+		}
+		w.Write([]byte(nextDate))
+	}
+}

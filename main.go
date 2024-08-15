@@ -63,11 +63,15 @@ func main() {
 	r.Put("/api/task", UpdateTaskHandler(db))
 	r.Post("/api/task/done", DoneTaskHandler(db))
 	r.Delete("/api/task", DeleteTaskHandler(db))
+	r.Get("/api/nextdate", NextDateHandler())
 
 	webDir := "./web"
 
 	r.Handle("/*", http.FileServer(http.Dir(webDir)))
 
 	log.Printf("Сервер открылся на порту:%s", port)
-	http.ListenAndServe(":"+port, r)
+	err = http.ListenAndServe(":"+port, r)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
