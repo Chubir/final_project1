@@ -1,4 +1,6 @@
-package main
+package handlers
+
+import "myApp/internal/repo"
 
 type createRequest struct {
 	Date    string `json:"date"`
@@ -10,9 +12,6 @@ type createRequest struct {
 type createResponseId struct {
 	Id string `json:"id"`
 }
-type createResponseError struct {
-	Error string `json:"error"`
-}
 
 type task struct {
 	Id      string `json:"id"`
@@ -23,9 +22,9 @@ type task struct {
 }
 
 type listResponse struct {
-	Tasks []task `json:"tasks"`
+	Tasks []repo.Task `json:"tasks"`
 }
 
-type listErrResponse struct {
+type ResponseError struct {
 	Error string `json:"error"`
 }
