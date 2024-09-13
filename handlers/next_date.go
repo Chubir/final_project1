@@ -42,12 +42,20 @@ func NextDate(now time.Time, repeat string, date string) (string, error) {
 
 func SendBadRequest(w http.ResponseWriter, err error) {
 	rErr := ResponseError{Error: err.Error()}
-	json.NewEncoder(w).Encode(rErr)
+	err = json.NewEncoder(w).Encode(rErr)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	w.WriteHeader(http.StatusBadRequest)
 }
 
 func SendNotFound(w http.ResponseWriter, err error) {
 	rErr := ResponseError{Error: err.Error()}
-	json.NewEncoder(w).Encode(rErr)
+	err = json.NewEncoder(w).Encode(rErr)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	w.WriteHeader(http.StatusNotFound)
 }

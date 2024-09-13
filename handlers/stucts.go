@@ -1,6 +1,6 @@
 package handlers
 
-import "myApp/internal/repo"
+import repo "myApp/internal/repository"
 
 type createRequest struct {
 	Date    string `json:"date"`

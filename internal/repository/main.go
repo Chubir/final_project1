@@ -3,7 +3,6 @@ package repo
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"myApp/config"
 	"os"
 
@@ -16,7 +15,7 @@ type Repository struct {
 	db *sql.DB
 }
 
-func New(conf *config.Config) *Repository {
+func New(conf *config.Config) (*Repository, error) {
 	db, err := sql.Open(config.SQL_TYPE, conf.Dbfile)
 	if err != nil {
 		panic(err)
@@ -30,25 +29,25 @@ func New(conf *config.Config) *Repository {
 	if install {
 		instance, err := sqlite3.WithInstance(db, &sqlite3.Config{})
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 
 		fSrc, err := (&file.File{}).Open("./migrations")
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 
 		m, err := migrate.NewWithInstance("file", fSrc, "scheduler", instance)
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 
 		// modify for Down
 		if err := m.Up(); err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 	}
-	return &repo
+	return &repo, nil
 }
 
 func (r *Repository) InsertTask(date, title, comment, repeat string) (int, error) {
@@ -75,6 +74,9 @@ func (r *Repository) GetListTask() ([]Task, error) {
 			return nil, err
 		}
 		tasks = append(tasks, rowTask)
+	}
+	if rows.Err() != nil {
+		return nil, err
 	}
 	return tasks, err
 }

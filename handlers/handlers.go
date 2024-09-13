@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"myApp/internal/repo"
+	repo "myApp/internal/repository"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -71,7 +71,11 @@ func CreateTaskHandler(db *repo.Repository) http.HandlerFunc {
 			return
 		}
 		respDataId.Id = strconv.Itoa(id)
-		json.NewEncoder(w).Encode(respDataId)
+		err = json.NewEncoder(w).Encode(respDataId)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -87,7 +91,11 @@ func ListTaskHandler(db *repo.Repository) http.HandlerFunc {
 		}
 		var listResponse listResponse
 		listResponse.Tasks = tasks
-		json.NewEncoder(w).Encode(listResponse)
+		err = json.NewEncoder(w).Encode(listResponse)
+		if err != nil {
+			SendBadRequest(w, err)
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -111,7 +119,11 @@ func ReadTaskHandler(db *repo.Repository) http.HandlerFunc {
 			SendBadRequest(w, err)
 			return
 		}
-		json.NewEncoder(w).Encode(task)
+		err = json.NewEncoder(w).Encode(task)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 
 	}
@@ -158,7 +170,11 @@ func UpdateTaskHandler(db *repo.Repository) http.HandlerFunc {
 			return
 		}
 
-		json.NewEncoder(w).Encode(task)
+		err = json.NewEncoder(w).Encode(task)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 	}
 
@@ -201,7 +217,11 @@ func DoneTaskHandler(db *repo.Repository) http.HandlerFunc {
 			}
 		}
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		json.NewEncoder(w).Encode(nil)
+		err = json.NewEncoder(w).Encode(nil)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -221,7 +241,11 @@ func DeleteTaskHandler(db *repo.Repository) http.HandlerFunc {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		json.NewEncoder(w).Encode(nil)
+		err = json.NewEncoder(w).Encode(nil)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 
 	}
@@ -235,40 +259,62 @@ func NextDateHandler() http.HandlerFunc {
 		re := regexp.MustCompile(`^(d\s\d+|y|w\s[1-7](,\s?[1-7])*)$`)
 		if repeat == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Отсутсвует повторение задачи."))
+			_, err := w.Write([]byte("Отсутсвует повторение задачи."))
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 			return
 		}
 		if !re.MatchString(repeat) {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Формат повторения задач неверный."))
+			_, err := w.Write([]byte("Формат повторения задач неверный."))
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 			return
 		}
 
 		nowTime, err := time.Parse("20060102", now)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Формат даты now неверный."))
+			_, err = w.Write([]byte("Формат даты now неверный."))
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 			return
 		}
 
 		if next == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("date обязательное поле."))
+			_, err = w.Write([]byte("date обязательное поле."))
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 		}
 
 		_, err = time.Parse("20060102", next)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Формат даты next неверный."))
+			_, err = w.Write([]byte("Формат даты next неверный."))
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 			return
 		}
 
 		nextDate, err := NextDate(nowTime, repeat, next)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Ошибка в функции NextDate."))
+			_, err = w.Write([]byte("Ошибка в функции NextDate."))
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 			return
 		}
-		w.Write([]byte(nextDate))
+		_, err = w.Write([]byte(nextDate))
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 }

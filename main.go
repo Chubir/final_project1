@@ -4,7 +4,7 @@ import (
 	"log"
 	"myApp/config"
 	"myApp/handlers"
-	"myApp/internal/repo"
+	repo "myApp/internal/repository"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -13,8 +13,10 @@ import (
 
 func main() {
 	conf := config.Init()
-	repo := repo.New(conf)
-
+	repo, err := repo.New(conf)
+	if err != nil {
+		log.Panic(err)
+	}
 	r := chi.NewRouter()
 	r.Post("/api/task", handlers.CreateTaskHandler(repo))
 	r.Get("/api/tasks", handlers.ListTaskHandler(repo))
@@ -29,8 +31,8 @@ func main() {
 	r.Handle("/*", http.FileServer(http.Dir(webDir)))
 
 	log.Printf("Сервер открылся на порту:%s", conf.Port)
-	err := http.ListenAndServe(":"+conf.Port, r)
+	err = http.ListenAndServe(":"+conf.Port, r)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 }
