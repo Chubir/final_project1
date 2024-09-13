@@ -3,12 +3,13 @@ package repo
 import (
 	"database/sql"
 	"fmt"
-	"myApp/config"
 	"os"
 
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database/sqlite3"
 	"github.com/golang-migrate/migrate/source/file"
+
+	"myApp/config"
 )
 
 type Repository struct {

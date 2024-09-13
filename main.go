@@ -2,13 +2,14 @@ package main
 
 import (
 	"log"
-	"myApp/config"
-	"myApp/handlers"
-	repo "myApp/internal/repository"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	_ "modernc.org/sqlite"
+
+	"myApp/config"
+	"myApp/handlers"
+	repo "myApp/internal/repository"
 )
 
 func main() {
